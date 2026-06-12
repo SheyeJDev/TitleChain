@@ -68,10 +68,10 @@ export class FundingTransaction {
   @Column({ nullable: true })
   repaymentTxHash: string;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   fundedAt: Date;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   repaidAt: Date;
 
   @Column({ nullable: true })

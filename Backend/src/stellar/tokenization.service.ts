@@ -23,17 +23,16 @@ export interface TokenMetadata {
 @Injectable()
 export class TokenizationService {
   private readonly logger = new Logger(TokenizationService.name);
-  private readonly issuerKeypair: Keypair;
+  private readonly issuerKeypair?: Keypair;
 
   constructor(private readonly stellarClient: StellarClient) {
-    // Initialize the issuer keypair from environment variables
     const secretKey = process.env.STELLAR_ISSUER_SECRET_KEY;
-    if (!secretKey) {
-      throw new Error('STELLAR_ISSUER_SECRET_KEY environment variable is required');
+    if (secretKey) {
+      this.issuerKeypair = Keypair.fromSecret(secretKey);
+      this.logger.log(`Tokenization service initialized with issuer: ${this.issuerKeypair.publicKey()}`);
+    } else {
+      this.logger.warn('STELLAR_ISSUER_SECRET_KEY is not set; tokenization disabled');
     }
-    
-    this.issuerKeypair = Keypair.fromSecret(secretKey);
-    this.logger.log(`Tokenization service initialized with issuer: ${this.issuerKeypair.publicKey()}`);
   }
 
   async tokenizeInvoice(invoice: Invoice): Promise<TokenizationResult> {
@@ -52,7 +51,7 @@ export class TokenizationService {
       
       // Build and submit the mint transaction
       const transactionXdr = this.stellarClient.buildMintTransaction(
-        this.issuerKeypair,
+        this.getIssuerKeypair(),
         tokenId,
         tokenAmount,
         metadata,
@@ -149,7 +148,7 @@ export class TokenizationService {
 
   async verifyIssuerAccount(): Promise<boolean> {
     try {
-      const account = await this.stellarClient.getAccount(this.issuerKeypair.publicKey());
+      const account = await this.stellarClient.getAccount(this.getIssuerKeypair().publicKey());
       this.logger.log(`Issuer account verified: ${account.accountId()}`);
       return true;
     } catch (error) {
@@ -168,7 +167,7 @@ export class TokenizationService {
   }
 
   getIssuerAddress(): string {
-    return this.issuerKeypair.publicKey();
+    return this.getIssuerKeypair().publicKey();
   }
 
   async simulateTokenization(invoice: Invoice): Promise<any> {
@@ -181,7 +180,7 @@ export class TokenizationService {
       const metadata = this.buildTokenMetadata(invoice);
 
       const transactionXdr = this.stellarClient.buildMintTransaction(
-        this.issuerKeypair,
+        this.getIssuerKeypair(),
         tokenId,
         tokenAmount,
         metadata,
@@ -192,5 +191,13 @@ export class TokenizationService {
       this.logger.error(`Failed to simulate tokenization for invoice ${invoice.id}:`, error);
       throw error;
     }
+  }
+
+  private getIssuerKeypair(): Keypair {
+    if (!this.issuerKeypair) {
+      throw new BadRequestException('STELLAR_ISSUER_SECRET_KEY environment variable is required');
+    }
+
+    return this.issuerKeypair;
   }
 }

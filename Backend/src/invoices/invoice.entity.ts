@@ -83,7 +83,7 @@ export class Invoice {
   @Column({ nullable: true })
   tokenizationTxHash: string; // Transaction hash of tokenization
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   tokenizedAt: Date; // When the invoice was tokenized
 
   @CreateDateColumn()

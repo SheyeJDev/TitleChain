@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  Account,
   Horizon,
-  Server,
   TransactionBuilder,
   Networks,
   Asset,
   Keypair,
-  Contract,
   SorobanDataBuilder,
+  nativeToScVal,
+  rpc,
   xdr,
   Operation,
 } from '@stellar/stellar-sdk';
@@ -16,14 +17,14 @@ import axios from 'axios';
 @Injectable()
 export class StellarClient {
   private readonly logger = new Logger(StellarClient.name);
-  private readonly server: Server;
-  private readonly horizonServer: Server;
+  private readonly server: rpc.Server;
+  private readonly horizonServer: Horizon.Server;
   private readonly contractId: string;
   private readonly networkPassphrase: string;
 
   constructor() {
     // Use Stellar testnet by default
-    this.server = new Server('https://soroban-testnet.stellar.org');
+    this.server = new rpc.Server('https://soroban-testnet.stellar.org');
     this.horizonServer = new Horizon.Server('https://horizon-testnet.stellar.org');
     this.networkPassphrase = Networks.TESTNET;
     
@@ -90,16 +91,14 @@ export class StellarClient {
     try {
       const sourceAccount = new Account(sourceKeypair.publicKey(), '1');
       
-      const contract = new Contract(this.contractId);
-      
       // Build the mint operation for the RWAMint contract
       const mintOp = Operation.invokeContractFunction({
-        contract: contract,
+        contract: this.contractId,
         function: 'mint',
         args: [
           xdr.ScVal.scvString(tokenId),
-          xdr.ScVal.scvI128(xdr.Int128.fromString(amount)),
-          metadata ? xdr.ScVal.scvMap(metadata) : xdr.ScVal.scvVoid(),
+          nativeToScVal(BigInt(amount), { type: 'i128' }),
+          metadata ? nativeToScVal(metadata) : xdr.ScVal.scvVoid(),
         ],
       });
 

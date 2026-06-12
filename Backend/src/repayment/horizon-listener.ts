@@ -1,5 +1,4 @@
 import { Injectable, Logger, OnModuleInit, forwardRef, Inject } from '@nestjs/common';
-import { Server } from '@stellar/stellar-sdk';
 import { Horizon } from '@stellar/stellar-sdk';
 import { FundingTransaction, TransactionStatus } from './funding-transaction.entity';
 import { RepaymentService } from './repayment.service';
@@ -22,7 +21,7 @@ export interface PaymentEvent {
 @Injectable()
 export class HorizonListener implements OnModuleInit {
   private readonly logger = new Logger(HorizonListener.name);
-  private readonly horizonServer: Server;
+  private readonly horizonServer: Horizon.Server;
   private readonly protocolWalletAddress: string;
   private lastCursor: string = 'now';
   private isListening = false;
@@ -36,10 +35,6 @@ export class HorizonListener implements OnModuleInit {
       process.env.STELLAR_HORIZON_URL || 'https://horizon-testnet.stellar.org'
     );
     this.protocolWalletAddress = process.env.PROTOCOL_WALLET_ADDRESS || '';
-    
-    if (!this.protocolWalletAddress) {
-      throw new Error('PROTOCOL_WALLET_ADDRESS environment variable is required');
-    }
   }
 
   async onModuleInit() {
@@ -47,6 +42,11 @@ export class HorizonListener implements OnModuleInit {
   }
 
   async startListening() {
+    if (!this.protocolWalletAddress) {
+      this.logger.warn('PROTOCOL_WALLET_ADDRESS is not set; Horizon listener disabled');
+      return;
+    }
+
     if (this.isListening) {
       this.logger.warn('Horizon listener is already running');
       return;
