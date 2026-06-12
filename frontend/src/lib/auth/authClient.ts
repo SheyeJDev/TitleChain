@@ -15,5 +15,9 @@ export async function loginWithWallet(
   if (!res.ok) throw new Error("Authentication failed");
 
   const data = await res.json();
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("titlechain_access_token", data.access_token);
+  }
+
   return data.access_token as string;
 }

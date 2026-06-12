@@ -35,6 +35,7 @@ export function useWallet() {
   }, []);
 
   const disconnect = useCallback(() => {
+    window.localStorage.removeItem("titlechain_access_token");
     setAddress(null);
     setToken(null);
   }, []);

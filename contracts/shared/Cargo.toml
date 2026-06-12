@@ -1,10 +1,11 @@
 [package]
-name = "rwa-mint"
-version = "0.1.0"
-edition = "2021"
+name = "titlechain-shared"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["rlib"]
 
 [dependencies]
 soroban-sdk = { workspace = true }
