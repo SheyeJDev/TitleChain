@@ -28,6 +28,7 @@ Client pays invoice → Smart contract auto-repays investor + yield
 
 ---
 
+
 ## Who Is It For?
 
 **Businesses** — SMEs, suppliers, contractors, and logistics companies waiting on large unpaid invoices.
