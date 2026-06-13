@@ -8,11 +8,9 @@ TitleChain is a Stellar-based protocol that lets businesses tokenize their unpai
 
 ## The Problem 
 
-
 Businesses across emerging markets complete real work — deliver goods, finish contracts, supply services — then wait 60–90 days to get paid. That waiting kills cashflow. Banks offer loans, but the process is slow, expensive, and most businesses don't qualify.
 
 ## The Solution
-
 
 TitleChain lets a business upload a verified unpaid invoice onto Stellar, tokenize it as a Soroban-based asset, and instantly borrow against it in USDC. When the client eventually pays the invoice, the smart contract automatically routes repayment to the investor — with interest. No middleman. No paperwork. No weeks of waiting.
 
